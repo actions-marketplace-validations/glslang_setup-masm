@@ -12,24 +12,45 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
+  package:
+    name: Build (tsc + esbuild)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run all
+
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - platform: x86
-            os: windows-latest
+            os: windows-2022
             toolchain: stable
           - platform: x64
-            os: windows-latest
+            os: windows-2022
+            toolchain: stable
+          - platform: x86
+            os: windows-2025-vs2026
+            toolchain: stable
+          - platform: x64
+            os: windows-2025-vs2026
             toolchain: stable
           - platform: arm64
             os: windows-11-arm
             toolchain: stable
     steps:
-      - uses: actions/checkout@v6
-      - uses: microsoft/setup-msbuild@v2
+      - uses: actions/checkout@v7
+      - uses: microsoft/setup-msbuild@v3
         with:
           msbuild-architecture: ${{matrix.platform}}
       - uses: ./
